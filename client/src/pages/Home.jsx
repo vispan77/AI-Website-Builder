@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Coins } from "lucide-react"
 import api from '../service/api';
 import { setUserData } from '../redux/userSlice';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
   const highLights = [
@@ -18,6 +19,7 @@ function Home() {
   console.log("userData ", userData);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -101,12 +103,15 @@ function Home() {
                               <span className='font-semibold'>+</span>
                             </button>
 
-                            <button className='w-full px-4 py-3 text-left text-sm hover:bg-white/5'>
+                            <button onClick={() => navigate("/dashboard")}
+                              className='w-full px-4 py-3 text-left text-sm hover:bg-white/5
+                            cursor-pointer'
+                            >
                               Dashboard
                             </button>
 
                             <button onClick={handleLogout}
-                            className='w-full px-4 py-3 text-left text-sm text-red-400
+                              className='w-full px-4 py-3 text-left text-sm text-red-400
                              hover:bg-white/5 cursor-pointer'>
                               Logout
                             </button>
@@ -148,10 +153,14 @@ function Home() {
         >
           Describe your idea and let AI generate a modern, responsive, production ready website
         </motion.p>
-        <button className='px-10 py-2 rounded-xl border bg-white
+        <button onClick={() => navigate("/dashboard")}
+        className='px-10 py-2 rounded-xl border bg-white
          text-black font-semibold hover:scale-105 trasnition mt-10'
         >
-          Get Started
+          
+          {
+            userData ? "Go to Dashboard" : "Get Started"
+          }
         </button>
 
       </section>

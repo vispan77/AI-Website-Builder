@@ -19,7 +19,7 @@ function LoginModals({ open, onClose }) {
                 avatar: result.user.photoURL
             });
             dispatch(setUserData(data.data))
-            console.log("data = ",  data.data);
+            console.log("data = ", data.data);
             onClose();
         } catch (error) {
             console.log(error)
@@ -46,7 +46,7 @@ function LoginModals({ open, onClose }) {
                         onClick={(event) => event.stopPropagation()}
                     >
                         <div className='relative rounded-3xl bg-[#0b0b0b] border border-white/10
-                        shadow-[0_30px_120px_rgba(0, 0, 0, 0)] overflow-hidden'
+                         shadow-[0_30px_120px_rgba(0, 0, 0, 0)] overflow-hidden'
                         >
                             <motion.div
                                 animate={{ opacity: [0.25, 0.4, 0.25] }}
