@@ -2,9 +2,21 @@ import { ArrowLeft } from 'lucide-react';
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
 import { motion } from "motion/react"
+import { useState } from 'react';
+import api from '../service/api';
 
 function Generate() {
     const navigate = useNavigate();
+    const [prompt, setPrompt] = useState("");
+    const handleGenerateWebsite = async() => {
+        try {
+            const result = await api.post("/website/generate", { prompt });
+            console.log("response from the backend from open router", result.data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
         <div className='min-h-screen bg-linear-to-br from-[#050505] 
            via-[#0b0b0b] to-[#050505] text-white'>
@@ -46,7 +58,9 @@ function Generate() {
                 <div className='mb-14'>
                     <h1 className='text-xl font-semibold mb-5 ml-3'>Describe your website</h1>
                     <div className='relative'>
-                        <textarea name="" id=""
+                        <textarea
+                            onChange={(event) => setPrompt(event.target.value)}
+                            value={prompt}
                             placeholder='Deacribe your website in details...'
                             className='w-full h-56 p-6 rounded-3xl bg-black/60
                             border border-white/10 outline-none resize-none text-sm leading-relaxed
@@ -57,11 +71,13 @@ function Generate() {
 
                 <div className='flex text-center justify-center'>
                     <motion.button
-                    initial={{opacity:0, y:50}}
-                    whileInView={{opacity:1, y:0}}
-                    whileHover={{scale: 1.05}}
-                    whileTap={{scale: 0.95}}
-                    className='px-14 py-4 rounded-2xl text-lg font-semibold bg-white text-black'
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className='px-14 py-4 rounded-2xl text-lg font-semibold
+                         bg-white text-black'
+                         onClick={handleGenerateWebsite}
                     >
                         Generate Website
                     </motion.button>

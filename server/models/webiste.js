@@ -22,7 +22,7 @@ const websiteSchema = new mongoose.Schema({
         type: String,
         default: "Untitled Website"
     },
-    lastestCode: {
+    latestCode: {
         type: String,
         required: true
     },

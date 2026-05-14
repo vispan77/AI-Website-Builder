@@ -7,6 +7,7 @@ import dbConnect from "./config/dbConnect.js";
 import authRoutes from "./routes/authRoutes.js";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/userRoutes.js";
+import websiteRouter from "./routes/websiteRoutes.js";
 
 
 
@@ -22,7 +23,9 @@ app.use(cors({
 
 //middleware for routes
 app.use("/api/auth", authRoutes);
-app.use("/api/user", userRouter)
+app.use("/api/user", userRouter);
+app.use("/api/website", websiteRouter);
+
 
 //db connection
 await dbConnect()

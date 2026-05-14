@@ -1,6 +1,6 @@
 const openRouterUrl = "https://openrouter.ai/api/v1/chat/completions";
 
-const modal = "inclusionai/ring-2.6-1t:free";
+const model = "inclusionai/ring-2.6-1t:free";
 
 const generateResponse = async (prompt) => {
     const response = await fetch(openRouterUrl, {
@@ -10,7 +10,7 @@ const generateResponse = async (prompt) => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            model: 'openai/gpt-5.2',
+            model: model,
             messages: [
                 {
                     role: "system",
@@ -25,15 +25,16 @@ const generateResponse = async (prompt) => {
         }),
     });
 
-    console.log("reponse from the open router = ", response);
+    
 
     //check the response
     if(!response.ok){
         const error = await response.text();
-        throw new Error("Open router error = ", error);
+        throw new Error(`Open router error = ${error}`);
     }
 
     const data = await response.json();
-    return data;
-
+    return data.choices[0].message.content;
 }
+
+export default generateResponse;
