@@ -5,7 +5,6 @@ function Header({ website }) {
         <div className='h-14 py-5 px-4 flex items-center justify-between border-b border-white/10'>
             <span className="font-semibold truncate">
                 {website.title}
-                <h1>Hello Jee</h1>
             </span>
         </div>
     )
