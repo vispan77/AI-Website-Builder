@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 
 function Chat({ website, message, setPrompt, prompt, handleUpdate }) {
 
-
+    console.log(message)
 
     return (
         <>
@@ -14,7 +14,7 @@ function Chat({ website, message, setPrompt, prompt, handleUpdate }) {
                             className={`max-w-[85%] ${message.role === "user" ? "ml-auto" : "mr-auto"}`}
                         >
                             <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed
-                    ${message.role === "user" ? "bg-white text-black" :
+                    ${message.role === "user" ? "bg-white/80 text-black" :
                                     "bg-white/5 border border-white/10 text-zinc-200"}`}>
                                 {message.content}
                             </div>
@@ -34,11 +34,12 @@ function Chat({ website, message, setPrompt, prompt, handleUpdate }) {
                         onChange={(event) => setPrompt(event.target.value)}
                         value={prompt}
                         className='flex-1 outline-none resize-none px-4 py-3 rounded-2xl
-                             bg-white/5 border border-white/10 text-sm'></textarea>
+                             bg-white/5 border border-white/10 text-sm focus:ring-1 focus:ring-white/20'></textarea>
                     <button
                         onClick={handleUpdate}
-                        lassName='px-4 py-3 rounded-2xl bg-white text-black'>
-                        <Send size={14} />
+                        className='px-4 py-3 rounded-2xl bg-white text-black cursor-pointer
+                         hover:scale-95 transition'>
+                        <Send size={18} />
                     </button>
 
                 </div>

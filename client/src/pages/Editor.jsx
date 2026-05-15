@@ -87,7 +87,7 @@ function Editor() {
     }
     return (
         <div className='h-screen w-screen flex bg-black text-white overflow-hidden'>
-            <aside className='hidden md:flex w-[350px] flex-col border-r
+            <aside className='hidden md:flex w-[380px] flex-col border-r
              border-white/10 bg-black/80'
             >
                 <Header website={website} />
