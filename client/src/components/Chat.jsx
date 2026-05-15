@@ -1,7 +1,7 @@
 import { Send } from 'lucide-react'
 import React, { useState } from 'react'
 
-function Chat({ website, message, setPrompt, prompt, handleUpdate }) {
+function Chat({ website, message, setPrompt, prompt, handleUpdate, handleUdateLoading, updateLoading, thinkingSteps, thinkingIndex }) {
 
     console.log(message)
 
@@ -24,6 +24,20 @@ function Chat({ website, message, setPrompt, prompt, handleUpdate }) {
                     ))
                 }
 
+                {
+                    updateLoading && (
+                        <div className='max-w-[85%] mr-auto'>
+                            <div className='px-4 py-2.5 rounded-2xl text-sm bg-white/5
+                            border border-white/10 text-zinc-400 italic'>
+                                {thinkingSteps[thinkingIndex]}
+                            </div>
+
+                        </div>
+                    )
+                }
+
+
+
             </div>
 
             <div className='p-3 border-t border-white/10'>
@@ -37,8 +51,10 @@ function Chat({ website, message, setPrompt, prompt, handleUpdate }) {
                              bg-white/5 border border-white/10 text-sm focus:ring-1 focus:ring-white/20'></textarea>
                     <button
                         onClick={handleUpdate}
-                        className='px-4 py-3 rounded-2xl bg-white text-black cursor-pointer
-                         hover:scale-95 transition'>
+                        disabled={updateLoading}
+                        className='px-4 py-3 rounded-2xl bg-white text-black cursor-pointer 
+                         hover:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed
+                         disabled:scale-100'>
                         <Send size={18} />
                     </button>
 

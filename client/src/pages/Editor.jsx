@@ -3,7 +3,9 @@ import { useParams } from 'react-router-dom'
 import api from '../service/api';
 import Header from '../components/Header';
 import Chat from '../components/Chat';
-import { Code2, Monitor, Rocket } from 'lucide-react';
+import { Code2, Monitor, Rocket, X } from 'lucide-react';
+import { AnimatePresence, easeIn, easeInOut, motion } from "motion/react";
+import Editor from '@monaco-editor/react';
 
 function Editor() {
     const { id } = useParams();
@@ -13,24 +15,51 @@ function Editor() {
     const [prompt, setPrompt] = useState("");
     const [error, setError] = useState("");
     const iframRef = useRef(null);
+    const [updateLoading, setUpdateLoading] = useState(false);
+    const [thinkingIndex, setThinkingIndex] = useState(0);
+    const thinkingSteps = [
+        "Understanding your request…",
+        "Planning layout changes…",
+        "Improving responsiveness…",
+        "Applying animations…",
+        "Finalizing update…",
+    ]
+    const [showCode, setShowCode] = useState(false);
 
-    
-    const handleUpdate = async() => {
-        setMessage((previosMessage) => [...previosMessage, {role: "user", content: prompt}])
+    const handleUdateLoading = async => {
+        if (!updateLoading) {
+            return;
+        }
+        const index = setInterval(() => {
+            setThinkingIndex((index) => (index + 1) % thinkingSteps.length);
+        }, 1200);
+
+        return () => clearInterval(index);
+    }
+
+
+    const handleUpdate = async () => {
+        if (!prompt) {
+            return;
+        }
+
+        const text = prompt;
+        console.log(text)
+        setPrompt("");
+        setUpdateLoading(true)
+        setMessage((previosMessage) => [...previosMessage, { role: "user", content: text }])
         try {
-            const result = await api.put(`/website/update/${id}`, {prompt});
-            setMessage((previosMessage) => [...previosMessage, {role: "ai", content: result.data.data.message}]);
+            const result = await api.put(`/website/update/${id}`, { prompt: text });
+            setUpdateLoading(false);
+            setMessage((previosMessage) => [...previosMessage, { role: "ai", content: result.data.data.message }]);
             setCode(result.data.data.code);
 
         } catch (error) {
             console.log(error);
+            setUpdateLoading(false);
             setError(error.response?.data?.message || "An error occurred while updating");
         }
     }
-
-
-
-
 
     const getWebsiteById = async () => {
         try {
@@ -67,7 +96,11 @@ function Editor() {
         if (code) {
             showWebsite();
         }
-    }, [website]);
+    }, [code]);
+
+    useEffect(() => {
+        handleUdateLoading();
+    }, [updateLoading])
 
 
     if (error) {
@@ -97,6 +130,10 @@ function Editor() {
                     setPrompt={setPrompt}
                     prompt={prompt}
                     handleUpdate={handleUpdate}
+                    handleUdateLoading={handleUdateLoading}
+                    updateLoading={updateLoading}
+                    thinkingSteps={thinkingSteps}
+                    thinkingIndex={thinkingIndex}
                 />
             </aside>
             <div className='flex-1 flex flex-col'>
@@ -109,7 +146,8 @@ function Editor() {
                         hover:scale-105 transition cursor-pointer'>
                             <Rocket size={14} /> Deploy
                         </button>
-                        <button className='p-2 border border-white/10 rounded-lg bg-white/10
+                        <button onClick={() => setShowCode(true)}
+                            className='p-2 border border-white/10 rounded-lg bg-white/10
                          hover:bg-white/20 hover:scale-105 transition cursor-pointer'
                         >
                             <Code2 size={18} />
@@ -126,6 +164,35 @@ function Editor() {
                 <iframe ref={iframRef} className='flex-1 w-full bg-white' />
 
             </div>
+
+            <AnimatePresence>
+                {
+                    showCode && (
+                        <motion.div
+                            initial={{ x: "100%", opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: "100%", opacity: 0 }}
+                            transition={{ delay: 0.5, animation: easeInOut }}
+                            className='fixed inset-y-0 right-0 w-full lg:w-[45%] z-[9999]
+                        bg-[#1e1e1e] flex flex-col'
+                        >
+                            <div className='h-12 px-4 flex item-center justify-between border-b
+                            border-white/10 bg-[#1e1e1e]'>
+                                <span className='text-sm font-medium'>index.html</span>
+                                <button onClick={() => setShowCode(false)}
+                                    className='cursor-pointer hover:scale-105'>
+                                    <X size={18} />
+                                </button>
+                            </div>
+                            <Editor
+                            
+                            />
+
+                        </motion.div>
+                    )
+                }
+            </AnimatePresence>
+
         </div>
     )
 }
