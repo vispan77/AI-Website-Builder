@@ -18,7 +18,7 @@ const generateWebsite = async (req, res) => {
         }
 
         const user = await User.findById(req.user._id);
-        
+
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -52,7 +52,7 @@ const generateWebsite = async (req, res) => {
 
         }
 
-        
+
 
         if (!parsed || !parsed.code) {
             return res.status(400).json({
@@ -101,6 +101,43 @@ const generateWebsite = async (req, res) => {
 }
 
 
+//controller to get the websiye by id
+const getWebsiteById = async (req, res) => {
+    try {
+        const {id} = req.params;
+        const user = await User.findById(req.user._id);
+        if(!user){
+            return res.status(400).json({
+                success: false,
+                message: "User not found"
+            });     
+        }
+
+        const website = await Website.findOne({_id: id, user: user._id});
+        if(!website){
+            return res.status(404).json({
+                success: false,
+                message: "Website not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Website fetched successfully",
+            data: website
+        })
+
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong while fetching the website by id"
+        });
+    }
+}
+
+
 
 //this is to check the response from the open router
 const generateDemo = async (req, res) => {
@@ -119,4 +156,4 @@ const generateDemo = async (req, res) => {
     }
 }
 
-export { generateDemo, generateWebsite }
+export { generateDemo, generateWebsite, getWebsiteById}
