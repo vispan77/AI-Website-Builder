@@ -104,17 +104,17 @@ const generateWebsite = async (req, res) => {
 //controller to get the websiye by id
 const getWebsiteById = async (req, res) => {
     try {
-        const {id} = req.params;
+        const { id } = req.params;
         const user = await User.findById(req.user._id);
-        if(!user){
+        if (!user) {
             return res.status(400).json({
                 success: false,
                 message: "User not found"
-            });     
+            });
         }
 
-        const website = await Website.findOne({_id: id, user: user._id});
-        if(!website){
+        const website = await Website.findOne({ _id: id, user: user._id });
+        if (!website) {
             return res.status(404).json({
                 success: false,
                 message: "Website not found"
@@ -127,13 +127,142 @@ const getWebsiteById = async (req, res) => {
             data: website
         })
 
-        
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             success: false,
             message: "Something went wrong while fetching the website by id"
         });
+    }
+}
+
+//change the promp for more modification
+const changeWebsite = async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        const { websiteId } = req.params;
+
+        if (!prompt) {
+            return res.status(404).json({
+                success: false,
+                message: "Prompt is required"
+            })
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        if (user.credits < 25) {
+            return res.status(404).json({
+                success: false,
+                message: "You have not enough credits to change the website"
+            })
+
+        }
+
+        const website = await Website.findOne({ _id: websiteId, user: user._id });
+        if (!website) {
+            return res.status(404).json({
+                success: false,
+                message: "Website not found"
+            })
+        }
+
+        const updatePrompt = `
+        UPDATE THIS HTML WEBSITE,
+
+        CURRENT CODE: ${website.latestCode}
+
+        USER REQUEST: ${prompt}
+
+        RETURN RAW JSON ONLY: 
+        {
+            "message": "SHORT CONFIRMATION MESSAGE FROM YOUR SIDE",
+            "code": "UPDATED FULL HTML"
+        }
+        `;
+
+        let raw = "";
+        let parsed = null;
+
+        for (let i = 0; i < 2 && !parsed; i++) {
+            raw = await generateResponse(updatePrompt);
+            parsed = await extractJson(raw);
+
+            if (!parsed) {
+                raw = await generateResponse(updatePrompt + "\\n\\nRETURN ONLY RAW JSON.");
+                parsed = await extractJson(raw);
+            }
+
+        }
+
+        if (!parsed || !parsed.code) {
+            return res.status(404).json({
+                success: false,
+                message: "AI returned invalid response"
+
+            })
+        }
+
+        //update the website conversation
+        website.conversation.push(
+            {
+                role: "user",
+                content: prompt
+            },
+            {
+                role: "ai",
+                content: parsed.message
+            }
+
+        )
+
+        website.latestCode = parsed.code;
+
+        await website.save();
+
+        user.credits = user.credits - 25;
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Website changed successfully",
+            websiteId: website._id,
+            message: parsed.message,
+            code: parsed.code,
+            remainingCredits: user.credits
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong while updating the website"
+        })
+    }
+}
+
+
+//controller to get all the wesbite created by the user
+const getAllWebsites = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        const websites = await Website.find({ user: user._id });
+
+        return res.status(200).json({
+            success: true,
+            message: "All Websites fetched successfully",
+            data: websites
+        })
+    } catch (error) {
+
     }
 }
 
@@ -156,4 +285,10 @@ const generateDemo = async (req, res) => {
     }
 }
 
-export { generateDemo, generateWebsite, getWebsiteById}
+export {
+    generateDemo,
+    generateWebsite,
+    getWebsiteById,
+    changeWebsite,
+    getAllWebsites
+}

@@ -1,6 +1,7 @@
 const openRouterUrl = "https://openrouter.ai/api/v1/chat/completions";
 
-const model = "inclusionai/ring-2.6-1t:free";
+const model = "openai/gpt-oss-120b:free";
+// const model = "inclusionai/ring-2.6-1t:free";
 
 const generateResponse = async (prompt) => {
     const response = await fetch(openRouterUrl, {
