@@ -90,7 +90,7 @@ const generateWebsite = async (req, res) => {
             remainingCredits: user.credits
         })
 
-        console.log("response from the open router" + raw)
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -266,6 +266,94 @@ const getAllWebsites = async (req, res) => {
     }
 }
 
+//controller for deploy website url
+const deployWebsite = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        const website = await Website.findOne({ _id: req.params.id, user: user._id });
+
+        if (!website) {
+            return res.status(404).json({
+                success: false,
+                message: "Website not found"
+            })
+        }
+
+        if (!website.slug) {
+            website.slug = website.title.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 60) +
+                website._id.toString().slice(-6);
+        }
+
+        website.deployed = true;
+        website.deployUrl = `${process.env.FRONTEND_URL}/site/${website.slug}`;
+
+        await website.save();
+        
+
+        return res.status(200).json({
+            success: true,
+            message: "Website deployed successfully",
+            url: website.deployUrl
+        })
+
+
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong while deploying the website"
+        })
+
+    }
+}
+
+
+//controller for geeting website by slug
+const getWebsiteBySlug = async (req, res) => {
+    try {
+        const { slug } = req.params;
+        
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        const website = await Website.findOne({ user: user._id, slug: slug });
+        if (!website) {
+            return res.status(404).json({
+                success: false,
+                message: "Website not found"
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Website fetched successfully",
+            data: website
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong while fetching the website by slug"
+        })
+    }
+}
+
 
 
 //this is to check the response from the open router
@@ -290,5 +378,7 @@ export {
     generateWebsite,
     getWebsiteById,
     changeWebsite,
-    getAllWebsites
+    getAllWebsites,
+    deployWebsite,
+    getWebsiteBySlug
 }

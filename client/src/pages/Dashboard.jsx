@@ -1,4 +1,4 @@
-import { ArrowLeft, Rocket, Share2 } from 'lucide-react'
+import { ArrowLeft, Check, Rocket, Share2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { delay, motion } from "motion/react"
 import { useNavigate } from 'react-router-dom'
@@ -11,6 +11,7 @@ function Dashboard() {
     const [website, setWebsite] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [copiedId, setCopiedId] = useState(null);
 
     const fetchAllWebsites = async () => {
         setLoading(true);
@@ -28,7 +29,30 @@ function Dashboard() {
 
     useEffect(() => {
         fetchAllWebsites()
-    }, [])
+    }, []);
+
+    const handleDeploy = async (id) => {
+        try {
+            const result = await api.get(`/website/deploy/${id}`);
+            console.log("result", result.data.url);
+            window.open(result.data.url, "_blank");
+            setWebsite((previosWebsite) => previosWebsite.map((web) =>
+                web._id === id ? { ...web, deployed: true, deployUrl: result.data.url } : web
+            ))
+        } catch (error) {
+            console.error("Error deploying website:", error);
+        }
+    }
+
+    const handleCopy = async (web) => {
+        await navigator.clipboard.writeText(web.deployUrl);
+        setCopiedId(web._id);
+        setTimeout(() => {
+            setCopiedId(null);
+        }, 2000);
+
+    }
+
     return (
         <div className='min-h-screen bg-[#050505] text-white'>
             <div className='sticky top-0 z-50 backdrop-blur-xl bg-black/50 border-b border-white/10'>
@@ -88,19 +112,23 @@ function Dashboard() {
                     !loading && !error && website.length > 0 && (
                         <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8'>
                             {
-                                website.map((web, index) => (
-                                    <motion.div
+                                website.map((web, index) => {
+
+                                    const copied = copiedId == web._id;
+                                    return <motion.div
                                         key={index}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                         whileHover={{ y: -6 }}
+                                        
                                         className="rounded-2xl bg-white/5 hover:bg-white/10 
                                         border border-white/10 overflow-hidden transition 
                                         flex flex-col"
 
                                     >
-                                        <div className='relative h-40 bg-black cursor-pointer'>
+                                        <div onClick={() => navigate(`/editor/${web._id}`)}
+                                        className='relative h-40 bg-black cursor-pointer'>
                                             <iframe srcDoc={web.latestCode} className='absolute inset-0 w-[140%] h-[140%] 
                                             scale-[0.7] origin-top-left pointer-event-none bg-white'
                                             />
@@ -116,22 +144,39 @@ function Dashboard() {
                                             </p>
                                             {
                                                 !web.deployed ? (
-                                                    <button className='mt-auto px-4 py-2 rounded-xl gap-2 flex item-center justify-center
+                                                    <button onClick={() => handleDeploy(web._id)}
+                                                        className='mt-auto px-4 py-2 rounded-xl gap-2 flex items-center justify-center
                                                     text-sm font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 
                                                     transition hover:scale-105 cursor-pointer'>
-                                                        <Rocket size={18}/> Deploy
+                                                        <Rocket size={18} /> Deploy
                                                     </button>
                                                 ) : (
-                                                    <button>
-                                                        <Share2/> Share Link
-                                                    </button>
+                                                    <motion.button
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={() => handleCopy(web)}
+                                                        className={`mt-auto flex items-center justify-center gap-2
+                                                        px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer
+                                                        ${copied ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" :
+                                                                "bg-white/10 hover:bg-white/20 border border-white/10"
+                                                            } `}
+                                                    >
+                                                        {copied ? (
+                                                            <>
+                                                                <Check size={14} /> Link Copied
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Share2 size={14} /> Share Link
+                                                            </>
+                                                        )}
+                                                    </motion.button>
                                                 )
                                             }
 
                                         </div>
 
                                     </motion.div>
-                                ))
+                                })
                             }
 
                         </div>

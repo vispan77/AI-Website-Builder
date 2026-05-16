@@ -46,7 +46,7 @@ function WebsiteEditor() {
         }
 
         const text = prompt;
-        console.log(text)
+
         setPrompt("");
         setUpdateLoading(true)
         setMessage((previosMessage) => [...previosMessage, { role: "user", content: text }])
@@ -62,6 +62,19 @@ function WebsiteEditor() {
             setError(error.response?.data?.message || "An error occurred while updating");
         }
     }
+
+    const handleDeploy = async () => {
+        try {
+            const result = await api.get(`/website/deploy/${id}`);
+            console.log("result", result.data.url);
+            window.open(result.data.url, "_blank");
+            setWebsite((previousWebsite) => ({ ...previousWebsite, deployed: true, deployUrl: result.data.url }));
+        } catch (error) {
+            console.log(error);
+            setError(error.response.data.message);
+        }
+    }
+
 
     const getWebsiteById = async () => {
         try {
@@ -146,11 +159,16 @@ function WebsiteEditor() {
                  border-white/10 bg-black/80'>
                     <span className='text-sx text-zinc-400'>Live Preview</span>
                     <div className='flex gap-2'>
-                        <button className='flex items-center gap-2 px-4 py-1.5 rounded-lg
-                        bg-linear-to-r from-indigo-500 to-purple-500 text-sm font-semibold
-                        hover:scale-105 transition cursor-pointer'>
-                            <Rocket size={14} /> Deploy
-                        </button>
+                        {
+                            website.deployed ? "" :
+                                <button onClick={handleDeploy}
+                                    className='flex items-center gap-2 px-4 py-1.5 rounded-lg
+                                    bg-linear-to-r from-indigo-500 to-purple-500 text-sm font-semibold
+                                    hover:scale-105 transition cursor-pointer'>
+                                    <Rocket size={14} /> Deploy
+                                </button>
+                        }
+
                         <button onClick={() => setShowChat(true)}
                             className='p-2 lg:hidden border border-white/10 rounded-lg bg-white/10
                          hover:bg-white/20 hover:scale-105 transition cursor-pointer'>
@@ -182,7 +200,7 @@ function WebsiteEditor() {
                         initial={{ x: "100%", opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: "100%", opacity: 0 }}
-                        transition={{delay:0.1, animation:easeInOut}}
+                        transition={{ delay: 0.1, animation: easeInOut }}
                         className='fixed inset-0 z-[9999] bg-black flex flex-col'
                     >
                         <Header website={website}
