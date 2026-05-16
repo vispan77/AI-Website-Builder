@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom'
 import api from '../service/api';
 import Header from '../components/Header';
 import Chat from '../components/Chat';
-import { Code2, Monitor, Rocket, X } from 'lucide-react';
+import { Code2, MessageSquare, Monitor, Rocket, X } from 'lucide-react';
 import { AnimatePresence, easeIn, easeInOut, motion } from "motion/react";
 import Editor from '@monaco-editor/react';
 
-function Editor() {
+function WebsiteEditor() {
     const { id } = useParams();
     const [website, setWebsite] = useState(null);
     const [code, setCode] = useState("");
@@ -17,6 +17,8 @@ function Editor() {
     const iframRef = useRef(null);
     const [updateLoading, setUpdateLoading] = useState(false);
     const [thinkingIndex, setThinkingIndex] = useState(0);
+    const [showFullPreview, setShowFullPreview] = useState(false);
+    const [showChat, setShowChat] = useState(false);
     const thinkingSteps = [
         "Understanding your request…",
         "Planning layout changes…",
@@ -123,7 +125,10 @@ function Editor() {
             <aside className='hidden md:flex w-[380px] flex-col border-r
              border-white/10 bg-black/80'
             >
-                <Header website={website} />
+                <Header website={website}
+                    showChat={showChat}
+                    setShowChat={setShowChat}
+                />
                 <Chat
                     website={website}
                     message={message}
@@ -146,13 +151,19 @@ function Editor() {
                         hover:scale-105 transition cursor-pointer'>
                             <Rocket size={14} /> Deploy
                         </button>
+                        <button onClick={() => setShowChat(true)}
+                            className='p-2 lg:hidden border border-white/10 rounded-lg bg-white/10
+                         hover:bg-white/20 hover:scale-105 transition cursor-pointer'>
+                            <MessageSquare size={18} />
+                        </button>
                         <button onClick={() => setShowCode(true)}
                             className='p-2 border border-white/10 rounded-lg bg-white/10
                          hover:bg-white/20 hover:scale-105 transition cursor-pointer'
                         >
                             <Code2 size={18} />
                         </button>
-                        <button className='p-2 border border-white/10 rounded-lg
+                        <button onClick={() => setShowFullPreview(true)}
+                            className='p-2 border border-white/10 rounded-lg
                          bg-white/10 hover:bg-white/20 hover:scale-105 transition cursor-pointer'
                         >
                             <Monitor size={18} />
@@ -166,13 +177,42 @@ function Editor() {
             </div>
 
             <AnimatePresence>
+                {showChat && (
+                    <motion.div
+                        initial={{ x: "100%", opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: "100%", opacity: 0 }}
+                        transition={{delay:0.1, animation:easeInOut}}
+                        className='fixed inset-0 z-[9999] bg-black flex flex-col'
+                    >
+                        <Header website={website}
+                            showChat={showChat}
+                            setShowChat={setShowChat}
+                        />
+                        <Chat
+                            website={website}
+                            message={message}
+                            setPrompt={setPrompt}
+                            prompt={prompt}
+                            handleUpdate={handleUpdate}
+                            handleUdateLoading={handleUdateLoading}
+                            updateLoading={updateLoading}
+                            thinkingSteps={thinkingSteps}
+                            thinkingIndex={thinkingIndex}
+                        />
+
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
                 {
                     showCode && (
                         <motion.div
                             initial={{ x: "100%", opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             exit={{ x: "100%", opacity: 0 }}
-                            transition={{ delay: 0.5, animation: easeInOut }}
+                            transition={{ delay: 0.3, animation: easeInOut }}
                             className='fixed inset-y-0 right-0 w-full lg:w-[45%] z-[9999]
                         bg-[#1e1e1e] flex flex-col'
                         >
@@ -185,7 +225,10 @@ function Editor() {
                                 </button>
                             </div>
                             <Editor
-                            
+                                theme='vs-dark'
+                                language='html'
+                                value={code}
+                                onChange={(v) => setCode(v)}
                             />
 
                         </motion.div>
@@ -193,8 +236,20 @@ function Editor() {
                 }
             </AnimatePresence>
 
+            <AnimatePresence>
+                {showFullPreview && (
+                    <motion.div className='fixed inset-0 z-[9999] bg-black'>
+                        <iframe srcDoc={code} className='w-full h-full bg-white' />
+                        <button onClick={() => setShowFullPreview(false)}
+                            className='absolute top-4 right-4 p-2 bg-black/70 rounded-lg cursor-pointer'>
+                            <X />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
         </div>
     )
 }
 
-export default Editor
+export default WebsiteEditor
