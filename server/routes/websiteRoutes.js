@@ -12,7 +12,7 @@ websiteRouter.get("/get-by-id/:id", isAuth, getWebsiteById);
 websiteRouter.put("/update/:websiteId", isAuth, changeWebsite);
 websiteRouter.get("/get-all", isAuth, getAllWebsites);
 websiteRouter.get("/deploy/:id", isAuth, deployWebsite);
-websiteRouter.get("/get-by-slug/:slug", isAuth, getWebsiteBySlug);
+websiteRouter.get("/get-by-slug/:slug", getWebsiteBySlug);
 websiteRouter.delete("/delete/:id", isAuth, deleteWebsite);
 
 

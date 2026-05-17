@@ -323,15 +323,7 @@ const getWebsiteBySlug = async (req, res) => {
         const { slug } = req.params;
 
 
-        const user = await User.findById(req.user._id);
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            })
-        }
-
-        const website = await Website.findOne({ user: user._id, slug: slug });
+        const website = await Website.findOne({ slug: slug });
         if (!website) {
             return res.status(404).json({
                 success: false,
