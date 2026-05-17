@@ -1,5 +1,7 @@
 import express from "express";
 const app = express();
+
+
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
@@ -8,6 +10,9 @@ import authRoutes from "./routes/authRoutes.js";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/userRoutes.js";
 import websiteRouter from "./routes/websiteRoutes.js";
+import stripeRouter from "./routes/stripeRoutes.js";
+import stripe from "./config/stripe.js";
+import { stripeWebhook } from "./controllers/stripeWebhook.js";
 
 
 
@@ -22,9 +27,11 @@ app.use(cors({
 }))
 
 //middleware for routes
+app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRouter);
 app.use("/api/website", websiteRouter);
+app.use("/api/stripe", stripeRouter);
 
 
 //db connection

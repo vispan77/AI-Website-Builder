@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from "motion/react"
 import LoginModals from '../components/LoginModals';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,6 +14,9 @@ function Home() {
 
   const [openLogin, setOpenLogin] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
+  const [websites, setWebsites] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { userData } = useSelector((state) => state.user);
   console.log("userData ", userData);
@@ -30,6 +33,26 @@ function Home() {
       console.log(error)
     }
   }
+
+  const fectcAllWebiste = async () => {
+    if (!userData) {
+      return
+    }
+    setLoading(true)
+    try {
+      const result = await api.get("/website/get-all");
+      setWebsites(result.data.data);
+      setLoading(false)
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      setError(error.response.data.message);
+    }
+  }
+
+  useEffect(() => {
+    fectcAllWebiste();
+  }, [userData])
 
 
 
@@ -49,7 +72,7 @@ function Home() {
           </div>
           <div className='flex items-center gap-5'>
             <div onClick={() => navigate("/pricing")}
-            className='hidden md:inline text-sm text-zinc-400 hover:text-white 
+              className='hidden md:inline text-sm text-zinc-400 hover:text-white 
               cursor-pointer'
             >
               Pricing
@@ -57,7 +80,7 @@ function Home() {
             {/* showing credits */}
             {
               userData && <div onClick={() => navigate("/pricing")}
-              className='hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full
+                className='hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full
               bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition'>
                 <Coins size={14} className='text-yellow-400' />
                 <span className='text-zinc-300'>Credits</span>
@@ -69,7 +92,7 @@ function Home() {
             {
               !userData ? (<button onClick={() => setOpenLogin(true)}
                 className='px-4 py-2 rounded-lg border border-white/20
-             hover:bg-white/10 text-sm'
+             hover:bg-white/10 text-sm cursor-pointer transition'
               >
                 Get started
               </button>) : (
@@ -155,11 +178,11 @@ function Home() {
         >
           Describe your idea and let AI generate a modern, responsive, production ready website
         </motion.p>
-        <button onClick={() => navigate("/dashboard")}
-        className='px-10 py-2 rounded-xl border bg-white
-         text-black font-semibold hover:scale-105 trasnition mt-10'
+        <button onClick={() => userData ?  navigate("/dashboard") : setOpenLogin(true)}
+          className='px-10 py-2 rounded-xl border bg-white
+         text-black font-semibold hover:scale-105 trasnition mt-10 cursor-pointer'
         >
-          
+
           {
             userData ? "Go to Dashboard" : "Get Started"
           }
@@ -167,29 +190,72 @@ function Home() {
 
       </section>
 
-      <section className='max-w-7xl mx-auto px-6 pb-32'>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-10'>
-          {
-            highLights.map((highLight, index) => (
-              <motion.div
-                key={index}
-                initial={{ y: 40, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                className='p-8 rounded-2xl bg-white/5 border border-white/10'
-              >
-                <h1 className='text-xl font-semibold mb-3'>
-                  {highLight}
-                </h1>
-                <p className='text-sm text-zinc-400'>
-                  Genweb.ai builds real website - clean code, animation responsiveness and
-                  scalable structure
-                </p>
-              </motion.div>
-            ))
-          }
-        </div>
+      {
+        !userData && (
+          <section className='max-w-7xl mx-auto px-6 pb-32'>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-10'>
+              {
+                highLights.map((highLight, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ y: 40, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    className='p-8 rounded-2xl bg-white/5 border border-white/10'
+                  >
+                    <h1 className='text-xl font-semibold mb-3'>
+                      {highLight}
+                    </h1>
+                    <p className='text-sm text-zinc-400'>
+                      Genweb.ai builds real website - clean code, animation responsiveness and
+                      scalable structure
+                    </p>
+                  </motion.div>
+                ))
+              }
+            </div>
 
-      </section>
+          </section>
+        )
+      }
+
+      {
+        userData && websites && websites.length > 0 && (
+          <section className='max-w-7xl mx-auto px-6 pb-32'>
+            <h1 className='text-2xl font-semibold mb-6'>
+              Your websites
+            </h1>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {websites.slice(0, 3).map((web, index) => (
+                <motion.div
+                  key={web._id}
+                  whileHover={{ y: -6 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  onClick={() => navigate(`/editor/${web._id}`)}
+                  className='group relative rounded-2xl bg-white/5 border border-white/10 
+                  overflow-hidden cursor-pointer hover:bg-white/10 transition-all'
+                >
+                  <div className='relative h-48 bg-black overflow-hidden'>
+                    <iframe
+                      srcDoc={web.latestCode}
+                      className='absolute inset-0 w-[140%] h-[140%] scale-[0.72] 
+                      origin-top-left pointer-events-none bg-white'
+                    />
+                    <div className='absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors' />
+                  </div>
+                  <div className='p-4'>
+                    <h3 className='font-medium truncate'>{web.title}</h3>
+                    <p className='text-xs text-zinc-500 mt-1'>
+                      Updated {new Date(web.updatedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        )
+      }
 
       <footer className='border-t border-white/10 py-10 text-center text-sm text-zinc-500'>
         &copy; {new Date().getFullYear()} Genweb ai

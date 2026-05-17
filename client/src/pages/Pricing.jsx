@@ -1,7 +1,9 @@
 import { ArrowLeft, Check, Coins } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from "motion/react"
+import { useSelector } from 'react-redux';
+import api from '../service/api';
 
 
 function Pricing() {
@@ -51,6 +53,32 @@ function Pricing() {
             button: "Contact Sales",
         },
     ];
+
+    const { userData } = useSelector((state) => state.user);
+    const [loading, setLoading] = useState(null);
+    const [error, setError] = useState("");
+
+
+    const handleStripeCheckout = async (planKey) => {
+        if (!userData) {
+            navigate("/");
+            return;
+        }
+        if (planKey == "free") {
+            navigate("/dashboard");
+            return;
+        };
+        setLoading(planKey);
+        try {
+            const result = await api.post(`/stripe`, { planType: planKey })
+            window.location.href = result.data.sessionUrl;
+            setLoading(null);
+        } catch (error) {
+            console.log(error);
+            setLoading(null);
+            setError(error.response?.data?.message || "An error occurred");
+        }
+    }
     return (
         <div className='relative min-h-screen overflow-hidden bg-[#050505] text-white px-6 py-16 pb-24'>
             <div className='absolute inset-0 pointer-events-none'>
@@ -133,6 +161,8 @@ function Pricing() {
                                 }
                             </ul>
                             <motion.button
+                                onClick={() => handleStripeCheckout(plan.key)}
+                                disabled={loading}
                                 whileTap={{ scale: 0.93 }}
                                 className={`w-full py-3 rounded-xl font-semibold transition cursor-pointer
                                     ${plan.popular ?
@@ -140,7 +170,7 @@ function Pricing() {
                                         "bg-white/10 hover:bg-white/20"
                                     } disabled:opacity-60`}
                             >
-                                {plan.button}
+                                {loading === plan.key ? "Redirecting..." : plan.button}
 
                             </motion.button>
 
