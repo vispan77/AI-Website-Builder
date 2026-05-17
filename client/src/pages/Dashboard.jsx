@@ -1,9 +1,10 @@
-import { ArrowLeft, Check, Rocket, Share2 } from 'lucide-react'
+import { ArrowLeft, Check, Rocket, Share2, Trash } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { delay, motion } from "motion/react"
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux';
 import api from '../service/api';
+import toast from 'react-hot-toast';
 
 function Dashboard() {
     const navigate = useNavigate();
@@ -51,6 +52,21 @@ function Dashboard() {
             setCopiedId(null);
         }, 2000);
 
+    }
+
+    const deleteWebsite = async (id) => {
+        setLoading(true);
+        try {
+            await api.delete(`/website/delete/${id}`);
+            // fetchAllWebsites();
+            toast.success("Website deleted successfully");
+            setWebsite((previousWebsite) => previousWebsite.filter((web) => web._id !== id))
+            setLoading(false);
+        } catch (error) {
+            console.log(error);
+            setError(error.response.data.message);
+            setLoading(false);
+        }
     }
 
     return (
@@ -121,14 +137,14 @@ function Dashboard() {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                         whileHover={{ y: -6 }}
-                                        
+
                                         className="rounded-2xl bg-white/5 hover:bg-white/10 
                                         border border-white/10 overflow-hidden transition 
                                         flex flex-col"
 
                                     >
                                         <div onClick={() => navigate(`/editor/${web._id}`)}
-                                        className='relative h-40 bg-black cursor-pointer'>
+                                            className='relative h-40 bg-black cursor-pointer'>
                                             <iframe srcDoc={web.latestCode} className='absolute inset-0 w-[140%] h-[140%] 
                                             scale-[0.7] origin-top-left pointer-event-none bg-white'
                                             />
@@ -136,12 +152,23 @@ function Dashboard() {
 
                                         </div>
                                         <div className='flex flex-col gap-4 p-5 flex-1'>
-                                            <h1 className='text-base font-semibold line-camp-2 truncate'>
-                                                {web.title}
-                                            </h1>
+                                            <div className='flex items-center justify-between'>
+                                                <h1 className='text-base font-semibold line-camp-2 truncate w-80'>
+                                                    {web.title}
+                                                </h1>
+                                                <button
+                                                    onClick={() => deleteWebsite(web._id)}
+                                                    className='cursor-pointer'
+                                                >
+                                                    <Trash size={18} className='text-red-500' />
+                                                </button>
+                                            </div>
+
                                             <p className='text-sm text-zinc-400'>
                                                 Last Updated {" "} {new Date(web.updatedAt).toLocaleDateString()}
                                             </p>
+
+
                                             {
                                                 !web.deployed ? (
                                                     <button onClick={() => handleDeploy(web._id)}

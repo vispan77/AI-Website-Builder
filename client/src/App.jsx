@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import useGetCurrentUser from './hooks/useGetCurrentUser'
 import { useSelector } from 'react-redux';
+import { Toaster } from 'react-hot-toast';
 import Dashboard from './pages/Dashboard';
 import Generate from './pages/Generate';
 import WebsiteEditor from './pages/WebsiteEditor';
@@ -17,6 +18,7 @@ function App() {
 
   return (
     <div>
+      <Toaster />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path="/dashboard" element={userData ? <Dashboard /> : <Home />} />
