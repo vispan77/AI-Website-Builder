@@ -6,6 +6,7 @@ const stripeCheckout = async (req, res) => {
         const { planType } = req.body;
         const userId = req.user._id;
         const plan = PLANS[planType];
+        console.log(plan)
 
         if (!plan || plan.price == 0) {
             return res.status(400).json({
@@ -44,6 +45,7 @@ const stripeCheckout = async (req, res) => {
         })
 
     } catch (error) {
+        console.error("Stripe Checkout Error:", error);
         return res.status(500).json({
             success: false,
             message: "Something went wrong while creating the checkout session"

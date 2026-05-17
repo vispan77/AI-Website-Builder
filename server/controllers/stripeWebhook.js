@@ -23,14 +23,14 @@ const stripeWebhook = async (req, res) => {
         const userId = session.metadata.userId;
         const credits = Number(session.metadata.credits);
         const plan = session.metadata.plan
-    }
 
-    await User.findByIdAndUpdate(
-        userId, {
-        $inc: { credits: credits },
-        $set: { plan: plan }
+        await User.findByIdAndUpdate(
+            userId, {
+            $inc: { credits: credits },
+            $set: { plan: plan }
+        }
+        );
     }
-    )
 
     return res.status(200).json({
         success: true,
