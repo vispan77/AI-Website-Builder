@@ -22,7 +22,7 @@ function LiveSite() {
 
     useEffect(() => {
         fetchWebsiteBySlug();
-    }, [slug]);
+    }, []);
 
     if (error) {
         <div className='h-screen flex items-center justify-center bg-black text-red-400'>
