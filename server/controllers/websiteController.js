@@ -321,9 +321,12 @@ const deployWebsite = async (req, res) => {
 const getWebsiteBySlug = async (req, res) => {
     try {
         const { slug } = req.params;
+        console.log("slug", slug)
 
 
         const website = await Website.findOne({ slug: slug });
+        console.log("website", website)
+
         if (!website) {
             return res.status(404).json({
                 success: false,
