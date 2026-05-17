@@ -5,7 +5,8 @@ import api from '../service/api';
 
 function LiveSite() {
     const { slug } = useParams();
-    console.log("slug", slug)
+    console.log("slug", slug);
+    console.log("current location", window.location.href);
     const [html, setHtml] = useState("");
     const [error, setError] = useState("");
 
