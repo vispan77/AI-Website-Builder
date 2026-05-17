@@ -68,206 +68,206 @@ function WebsiteEditor() {
             const result = await api.get(`/website/deploy/${id}`);
             console.log("result", result.data.url);
             window.open(result.data.url, "_blank");
-            setWebsite((previousWebsite) => ({ ...previousWebsite, deployed: true, deployUrl: result.data.url }));
-        } catch (error) {
-            console.log(error);
-            setError(error.response.data.message);
-        }
+            setWebsite((previouWebsite) => ({ ...previouWebsite, deployed: true, deployUrl: result.data.url }));
+    } catch (error) {
+        console.log(error);
+        setError(error.response.data.message);
     }
+}
 
 
-    const getWebsiteById = async () => {
-        try {
-            const result = await api.get(`/website/get-by-id/${id}`);
-            console.log("result of the websitte", result.data.data);
-            setWebsite(result.data.data);
-            setCode(result.data.data.latestCode);
-            setMessage(result.data.data.conversation)
-        } catch (error) {
-            console.log(error)
-            setError(error.response.data.message);
-        }
+const getWebsiteById = async () => {
+    try {
+        const result = await api.get(`/website/get-by-id/${id}`);
+        console.log("result of the websitte", result.data.data);
+        setWebsite(result.data.data);
+        setCode(result.data.data.latestCode);
+        setMessage(result.data.data.conversation)
+    } catch (error) {
+        console.log(error)
+        setError(error.response.data.message);
     }
+}
 
-    useEffect(() => {
-        getWebsiteById();
-    }, [id]);
+useEffect(() => {
+    getWebsiteById();
+}, [id]);
 
 
 
-    const showWebsite = () => {
-        if (!iframRef.current || !code) {
-            return;
-        }
-
-        const blob = new Blob([code], { type: "text/html" });
-        const url = URL.createObjectURL(blob);
-        iframRef.current.src = url;
-        URL.revokeObjectURL(url);
+const showWebsite = () => {
+    if (!iframRef.current || !code) {
         return;
     }
 
-    useEffect(() => {
-        if (code) {
-            showWebsite();
-        }
-    }, [code]);
+    const blob = new Blob([code], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    iframRef.current.src = url;
+    URL.revokeObjectURL(url);
+    return;
+}
 
-    useEffect(() => {
-        handleUdateLoading();
-    }, [updateLoading])
-
-
-    if (error) {
-        return (
-            <div className='h-screen flex items-center justify-center bg-black text-red-400'>
-                {error}
-            </div>
-        )
+useEffect(() => {
+    if (code) {
+        showWebsite();
     }
+}, [code]);
 
-    if (!website) {
-        return (
-            <div className='h-screen flex items-center justify-center bg-black text-white'>
-                Loading...
-            </div>
-        )
-    }
+useEffect(() => {
+    handleUdateLoading();
+}, [updateLoading])
+
+
+if (error) {
     return (
-        <div className='h-screen w-screen flex bg-black text-white overflow-hidden'>
-            <aside className='hidden md:flex w-[380px] flex-col border-r
+        <div className='h-screen flex items-center justify-center bg-black text-red-400'>
+            {error}
+        </div>
+    )
+}
+
+if (!website) {
+    return (
+        <div className='h-screen flex items-center justify-center bg-black text-white'>
+            Loading...
+        </div>
+    )
+}
+return (
+    <div className='h-screen w-screen flex bg-black text-white overflow-hidden'>
+        <aside className='hidden md:flex w-[380px] flex-col border-r
              border-white/10 bg-black/80'
-            >
-                <Header website={website}
-                    showChat={showChat}
-                    setShowChat={setShowChat}
-                />
-                <Chat
-                    website={website}
-                    message={message}
-                    setPrompt={setPrompt}
-                    prompt={prompt}
-                    handleUpdate={handleUpdate}
-                    handleUdateLoading={handleUdateLoading}
-                    updateLoading={updateLoading}
-                    thinkingSteps={thinkingSteps}
-                    thinkingIndex={thinkingIndex}
-                />
-            </aside>
-            <div className='flex-1 flex flex-col'>
-                <div className='h-14 px-4 flex justify-between items-center border-b
+        >
+            <Header website={website}
+                showChat={showChat}
+                setShowChat={setShowChat}
+            />
+            <Chat
+                website={website}
+                message={message}
+                setPrompt={setPrompt}
+                prompt={prompt}
+                handleUpdate={handleUpdate}
+                handleUdateLoading={handleUdateLoading}
+                updateLoading={updateLoading}
+                thinkingSteps={thinkingSteps}
+                thinkingIndex={thinkingIndex}
+            />
+        </aside>
+        <div className='flex-1 flex flex-col'>
+            <div className='h-14 px-4 flex justify-between items-center border-b
                  border-white/10 bg-black/80'>
-                    <span className='text-sx text-zinc-400'>Live Preview</span>
-                    <div className='flex gap-2'>
-                        {
-                            website.deployed ? "" :
-                                <button onClick={handleDeploy}
-                                    className='flex items-center gap-2 px-4 py-1.5 rounded-lg
+                <span className='text-sx text-zinc-400'>Live Preview</span>
+                <div className='flex gap-2'>
+                    {
+                        website.deployed ? "" :
+                            <button onClick={handleDeploy}
+                                className='flex items-center gap-2 px-4 py-1.5 rounded-lg
                                     bg-linear-to-r from-indigo-500 to-purple-500 text-sm font-semibold
                                     hover:scale-105 transition cursor-pointer'>
-                                    <Rocket size={14} /> Deploy
-                                </button>
-                        }
+                                <Rocket size={14} /> Deploy
+                            </button>
+                    }
 
-                        <button onClick={() => setShowChat(true)}
-                            className='p-2 lg:hidden border border-white/10 rounded-lg bg-white/10
+                    <button onClick={() => setShowChat(true)}
+                        className='p-2 lg:hidden border border-white/10 rounded-lg bg-white/10
                          hover:bg-white/20 hover:scale-105 transition cursor-pointer'>
-                            <MessageSquare size={18} />
-                        </button>
-                        <button onClick={() => setShowCode(true)}
-                            className='p-2 border border-white/10 rounded-lg bg-white/10
+                        <MessageSquare size={18} />
+                    </button>
+                    <button onClick={() => setShowCode(true)}
+                        className='p-2 border border-white/10 rounded-lg bg-white/10
                          hover:bg-white/20 hover:scale-105 transition cursor-pointer'
-                        >
-                            <Code2 size={18} />
-                        </button>
-                        <button onClick={() => setShowFullPreview(true)}
-                            className='p-2 border border-white/10 rounded-lg
+                    >
+                        <Code2 size={18} />
+                    </button>
+                    <button onClick={() => setShowFullPreview(true)}
+                        className='p-2 border border-white/10 rounded-lg
                          bg-white/10 hover:bg-white/20 hover:scale-105 transition cursor-pointer'
-                        >
-                            <Monitor size={18} />
-                        </button>
-                    </div>
-
+                    >
+                        <Monitor size={18} />
+                    </button>
                 </div>
-
-                <iframe ref={iframRef} className='flex-1 w-full bg-white' />
 
             </div>
 
-            <AnimatePresence>
-                {showChat && (
+            <iframe ref={iframRef} className='flex-1 w-full bg-white' />
+
+        </div>
+
+        <AnimatePresence>
+            {showChat && (
+                <motion.div
+                    initial={{ x: "100%", opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: "100%", opacity: 0 }}
+                    transition={{ delay: 0.1, animation: easeInOut }}
+                    className='fixed inset-0 z-[9999] bg-black flex flex-col'
+                >
+                    <Header website={website}
+                        showChat={showChat}
+                        setShowChat={setShowChat}
+                    />
+                    <Chat
+                        website={website}
+                        message={message}
+                        setPrompt={setPrompt}
+                        prompt={prompt}
+                        handleUpdate={handleUpdate}
+                        handleUdateLoading={handleUdateLoading}
+                        updateLoading={updateLoading}
+                        thinkingSteps={thinkingSteps}
+                        thinkingIndex={thinkingIndex}
+                    />
+
+                </motion.div>
+            )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+            {
+                showCode && (
                     <motion.div
                         initial={{ x: "100%", opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: "100%", opacity: 0 }}
-                        transition={{ delay: 0.1, animation: easeInOut }}
-                        className='fixed inset-0 z-[9999] bg-black flex flex-col'
-                    >
-                        <Header website={website}
-                            showChat={showChat}
-                            setShowChat={setShowChat}
-                        />
-                        <Chat
-                            website={website}
-                            message={message}
-                            setPrompt={setPrompt}
-                            prompt={prompt}
-                            handleUpdate={handleUpdate}
-                            handleUdateLoading={handleUdateLoading}
-                            updateLoading={updateLoading}
-                            thinkingSteps={thinkingSteps}
-                            thinkingIndex={thinkingIndex}
-                        />
-
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-                {
-                    showCode && (
-                        <motion.div
-                            initial={{ x: "100%", opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: "100%", opacity: 0 }}
-                            transition={{ delay: 0.3, animation: easeInOut }}
-                            className='fixed inset-y-0 right-0 w-full lg:w-[45%] z-[9999]
+                        transition={{ delay: 0.3, animation: easeInOut }}
+                        className='fixed inset-y-0 right-0 w-full lg:w-[45%] z-[9999]
                         bg-[#1e1e1e] flex flex-col'
-                        >
-                            <div className='h-12 px-4 flex item-center justify-between border-b
+                    >
+                        <div className='h-12 px-4 flex item-center justify-between border-b
                             border-white/10 bg-[#1e1e1e]'>
-                                <span className='text-sm font-medium'>index.html</span>
-                                <button onClick={() => setShowCode(false)}
-                                    className='cursor-pointer hover:scale-105'>
-                                    <X size={18} />
-                                </button>
-                            </div>
-                            <Editor
-                                theme='vs-dark'
-                                language='html'
-                                value={code}
-                                onChange={(v) => setCode(v)}
-                            />
+                            <span className='text-sm font-medium'>index.html</span>
+                            <button onClick={() => setShowCode(false)}
+                                className='cursor-pointer hover:scale-105'>
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <Editor
+                            theme='vs-dark'
+                            language='html'
+                            value={code}
+                            onChange={(v) => setCode(v)}
+                        />
 
-                        </motion.div>
-                    )
-                }
-            </AnimatePresence>
-
-            <AnimatePresence>
-                {showFullPreview && (
-                    <motion.div className='fixed inset-0 z-[9999] bg-black'>
-                        <iframe srcDoc={code} className='w-full h-full bg-white' />
-                        <button onClick={() => setShowFullPreview(false)}
-                            className='absolute top-4 right-4 p-2 bg-black/70 rounded-lg cursor-pointer'>
-                            <X />
-                        </button>
                     </motion.div>
-                )}
-            </AnimatePresence>
+                )
+            }
+        </AnimatePresence>
 
-        </div>
-    )
+        <AnimatePresence>
+            {showFullPreview && (
+                <motion.div className='fixed inset-0 z-[9999] bg-black'>
+                    <iframe srcDoc={code} className='w-full h-full bg-white' />
+                    <button onClick={() => setShowFullPreview(false)}
+                        className='absolute top-4 right-4 p-2 bg-black/70 rounded-lg cursor-pointer'>
+                        <X />
+                    </button>
+                </motion.div>
+            )}
+        </AnimatePresence>
+
+    </div>
+)
 }
 
 export default WebsiteEditor

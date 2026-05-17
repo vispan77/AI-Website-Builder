@@ -48,14 +48,16 @@ function Home() {
             GenWeb ai
           </div>
           <div className='flex items-center gap-5'>
-            <div className='hidden md:inline text-sm text-zinc-400 hover:text-white 
+            <div onClick={() => navigate("/pricing")}
+            className='hidden md:inline text-sm text-zinc-400 hover:text-white 
               cursor-pointer'
             >
               Pricing
             </div>
             {/* showing credits */}
             {
-              userData && <div className='hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full
+              userData && <div onClick={() => navigate("/pricing")}
+              className='hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full
               bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition'>
                 <Coins size={14} className='text-yellow-400' />
                 <span className='text-zinc-300'>Credits</span>

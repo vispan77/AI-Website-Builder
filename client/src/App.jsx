@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Generate from './pages/Generate';
 import WebsiteEditor from './pages/WebsiteEditor';
 import LiveSite from './pages/LiveSite';
+import Pricing from './pages/Pricing';
 
 
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="/generate" element={userData ? <Generate /> : <Home />} />
         <Route path="/editor/:id" element={userData ? <WebsiteEditor /> : <Home />} />
         <Route path='/site/:slug' element={<LiveSite />} />
+        <Route path='/pricing' element={<Pricing />} />
       </Routes>
     </div>
   )
