@@ -14,7 +14,8 @@ import stripeRouter from "./routes/stripeRoutes.js";
 import stripe from "./config/stripe.js";
 import { stripeWebhook } from "./controllers/stripeWebhook.js";
 
-
+//route for the stripe webhoook json as it require raw data
+app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 
 //middleware
 app.use(express.json());
@@ -28,7 +29,6 @@ app.use(cors({
 }))
 
 //middleware for routes
-app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRouter);
 app.use("/api/website", websiteRouter);

@@ -27,7 +27,7 @@ const stripeWebhook = async (req, res) => {
         await User.findByIdAndUpdate(
             userId, {
             $inc: { credits: credits },
-            $set: { plan: plan }
+            $set: { plans: plan }
         }
         );
     }
